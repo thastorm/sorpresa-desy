@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Per Desy 💗</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#fdf2f6;font-family:system-ui,sans-serif;min-height:100vh;}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* COUNTDOWN SCREEN */
+#screen-countdown{background:#fff5f8;align-items:center;justify-content:center;padding:2rem;}
+.countdown-wrap{max-width:390px;width:100%;text-align:center;}
+.phone-frame{background:#fff5f8;border-radius:32px;border:8px solid #e8c4d4;overflow:hidden;padding:0;}
+.cd-topbar{background:#fce4ec;padding:2rem 1.5rem 2.5rem;text-align:center;position:relative;}
+.cd-petal{position:absolute;border-radius:50% 10% 50% 10%;background:#f48fb1;opacity:0.3;}
+.lock-circle{width:80px;height:80px;border-radius:50%;background:#fff;border:2px solid #f48fb1;margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center;}
+.cd-label{font-size:11px;color:#c2718a;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;}
+.cd-title{font-size:22px;font-weight:500;color:#7d2b4a;line-height:1.3;}
+.cd-body{padding:1.5rem 1.25rem 2rem;}
+.cd-sublabel{font-size:11px;color:#c2718a;text-align:center;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;}
+.cd-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem;}
+.cd-block{background:#fff;border:0.5px solid #f4b8cc;border-radius:14px;padding:14px 6px 10px;text-align:center;}
+.cd-num{font-size:28px;font-weight:500;color:#c2385a;line-height:1;}
+.cd-unit{font-size:10px;color:#c2718a;margin-top:4px;letter-spacing:0.06em;}
+.cd-msg{background:#fff;border:0.5px solid #f4b8cc;border-radius:18px;padding:1.25rem;margin-bottom:1rem;font-size:13px;color:#7d2b4a;line-height:1.6;}
+.unlock-btn{width:100%;background:#e8a0b8;border:none;border-radius:50px;padding:16px;font-size:15px;font-weight:500;color:#fff;cursor:not-allowed;opacity:0.5;display:flex;align-items:center;justify-content:center;gap:10px;}
+.unlock-btn.active{background:#d4537e;opacity:1;cursor:pointer;}
+.unlock-btn.active:hover{background:#c2385a;}
+
+/* MENU SCREEN */
+#screen-menu{background:#fff5f8;}
+.app-wrap{max-width:390px;width:100%;margin:0 auto;}
+.topbar{background:#fce4ec;padding:1.5rem 1.25rem 1rem;text-align:center;}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#c2718a;cursor:pointer;margin-bottom:1rem;background:#fff;border:0.5px solid #f4b8cc;border-radius:20px;padding:5px 12px;}
+.screen-title{font-size:20px;font-weight:500;color:#7d2b4a;margin-bottom:2px;}
+.screen-sub{font-size:12px;color:#c2718a;}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:1.25rem;}
+.menu-card{background:#fff;border:0.5px solid #f4b8cc;border-radius:20px;padding:1.25rem;cursor:pointer;transition:background 0.15s;display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
+.menu-card:hover{background:#fce4ec;}
+.menu-card.wide{grid-column:1/-1;}
+.card-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fce4ec;}
+.card-title{font-size:14px;font-weight:500;color:#7d2b4a;}
+.card-desc{font-size:11px;color:#c2718a;line-height:1.4;}
+.section{display:none;}
+.section.active{display:block;}
+.sec-body{padding:1.25rem;}
+
+/* GALLERY */
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.gallery-cell{aspect-ratio:1;background:#fce4ec;border-radius:10px;overflow:hidden;cursor:pointer;}
+.gallery-cell img{width:100%;height:100%;object-fit:cover;display:block;}
+.gallery-cell:hover img{opacity:0.85;}
+.gallery-empty{text-align:center;padding:2rem 0;color:#e8a0b8;font-size:13px;grid-column:1/-1;}
+.add-photo-btn{width:100%;border:1px dashed #f4b8cc;background:transparent;border-radius:14px;padding:12px;font-size:13px;color:#c2718a;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.add-photo-btn:hover{background:#fce4ec;}
+.hidden-input{display:none;}
+.upload-progress{text-align:center;font-size:12px;color:#c2718a;margin-top:8px;display:none;}
+
+/* LIGHTBOX */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(80,20,40,0.93);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:1rem;}
+.lightbox.open{display:flex;}
+.lightbox-close{position:absolute;top:16px;right:20px;font-size:28px;color:#fff;cursor:pointer;background:none;border:none;line-height:1;}
+.lightbox img{max-width:100%;max-height:72vh;border-radius:16px;object-fit:contain;}
+.lightbox-nav{display:flex;gap:24px;margin-top:16px;}
+.lb-btn{background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:44px;height:44px;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.lb-btn:hover{background:rgba(255,255,255,0.3);}
+.lb-counter{color:rgba(255,255,255,0.55);font-size:12px;margin-top:10px;}
+
+/* COMPLIMENTI */
+.smile-section{text-align:center;padding:2rem 1.25rem;}
+.smile-icon-wrap{width:80px;height:80px;background:#fce4ec;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;}
+.compliment-card{background:#fff;border:0.5px solid #f4b8cc;border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;min-height:100px;display:flex;align-items:center;justify-content:center;}
+.compliment-text{font-size:16px;color:#c2718a;line-height:1.6;text-align:center;}
+.smile-btn{background:#d4537e;border:none;border-radius:50px;padding:16px 32px;font-size:28px;cursor:pointer;width:100%;}
+.smile-btn:hover{background:#c2385a;}
+
+/* PROMESSE */
+.promise-list{display:flex;flex-direction:column;gap:10px;}
+.p-empty{text-align:center;padding:2rem 0;color:#e8a0b8;font-size:13px;}
+.promise-item{display:flex;align-items:flex-start;gap:12px;background:#fff;border:0.5px solid #f4b8cc;border-radius:16px;padding:14px;}
+.p-check{width:20px;height:20px;border-radius:50%;border:1.5px solid #f48fb1;flex-shrink:0;margin-top:1px;cursor:pointer;}
+.p-check.done{background:#f48fb1;border-color:#f48fb1;}
+.p-text{font-size:13px;color:#7d2b4a;line-height:1.5;}
+.p-text.done{text-decoration:line-through;color:#e8a0b8;}
+.add-form{margin-top:1rem;}
+.add-row{display:flex;gap:8px;}
+.add-input{flex:1;border:0.5px solid #f4b8cc;border-radius:12px;padding:10px 14px;font-size:13px;color:#7d2b4a;background:#fff;outline:none;}
+.add-input::placeholder{color:#e8a0b8;}
+.add-input:focus{border-color:#d4537e;}
+.add-input-btn{background:#d4537e;border:none;border-radius:12px;padding:10px 16px;color:#fff;font-size:18px;cursor:pointer;}
+.add-input-btn:hover{background:#c2385a;}
+
+/* ADMIN */
+#screen-admin{background:#fff5f8;padding:1.5rem;min-height:100vh;}
+.admin-wrap{max-width:500px;margin:0 auto;}
+.admin-title{font-size:20px;font-weight:500;color:#7d2b4a;margin-bottom:1.5rem;text-align:center;}
+.admin-section{background:#fff;border:0.5px solid #f4b8cc;border-radius:16px;padding:1.25rem;margin-bottom:1rem;}
+.admin-section h3{font-size:14px;font-weight:500;color:#7d2b4a;margin-bottom:12px;}
+.admin-input{width:100%;border:0.5px solid #f4b8cc;border-radius:10px;padding:9px 12px;font-size:13px;color:#7d2b4a;background:#fff5f8;outline:none;margin-bottom:8px;}
+.admin-input:focus{border-color:#d4537e;background:#fff;}
+.admin-btn{background:#d4537e;border:none;border-radius:10px;padding:10px 20px;color:#fff;font-size:13px;cursor:pointer;font-weight:500;}
+.admin-btn:hover{background:#c2385a;}
+.admin-label{display:flex;align-items:center;gap:6px;border:1px dashed #f4b8cc;border-radius:10px;padding:10px;cursor:pointer;font-size:12px;color:#c2718a;background:#fff5f8;margin-bottom:8px;}
+.admin-label:hover{background:#fce4ec;}
+.admin-logout{font-size:12px;color:#c2718a;cursor:pointer;text-align:center;margin-top:1rem;}
+.admin-logout:hover{color:#d4537e;}
+.status-msg{font-size:12px;color:#1D9E75;margin-top:6px;display:none;}
+</style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">&#10005;</button>
+  <img id="lb-img" src="" alt="" />
+  <div class="lightbox-nav">
+    <button class="lb-btn" onclick="lbPrev()">&#8592;</button>
+    <button class="lb-btn" onclick="lbNext()">&#8594;</button>
+  </div>
+  <p class="lb-counter" id="lb-counter"></p>
+</div>
+
+<div id="secret-admin-btn" onclick="showScreen('screen-admin')" style="position:fixed;top:12px;left:12px;z-index:9999;font-size:14px;color:rgba(255,255,255,0.08);cursor:pointer;user-select:none;line-height:1;">♥</div>
+<!-- SCREEN 1: COUNTDOWN -->
+<div id="screen-countdown" class="screen active">
+  <div class="countdown-wrap">
+    <div class="phone-frame">
+      <div class="cd-topbar">
+        <div class="cd-petal" style="top:10%;left:8%;width:14px;height:14px;transform:rotate(20deg);"></div>
+        <div class="cd-petal" style="top:20%;right:12%;width:20px;height:20px;transform:rotate(-30deg);opacity:0.2;"></div>
+        <div class="cd-petal" style="bottom:15%;left:18%;width:12px;height:12px;transform:rotate(50deg);"></div>
+        <div class="cd-petal" style="top:50%;right:6%;width:16px;height:16px;transform:rotate(10deg);opacity:0.2;"></div>
+        <div class="lock-circle">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect x="6" y="14" width="20" height="14" rx="4" fill="#f48fb1"/>
+            <path d="M10 14v-4a6 6 0 0112 0v4" stroke="#c2385a" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <circle cx="16" cy="21" r="2" fill="white"/>
+          </svg>
+        </div>
+        <p class="cd-label">qualcosa di speciale</p>
+        <p class="cd-title">Ciao Desy 💗<br>Ti aspetta una sorpresa</p>
+      </div>
+      <div class="cd-body">
+        <p class="cd-sublabel">manca ancora</p>
+        <div class="cd-row">
+          <div class="cd-block"><div class="cd-num" id="cd-days">--</div><div class="cd-unit">giorni</div></div>
+          <div class="cd-block"><div class="cd-num" id="cd-hours">--</div><div class="cd-unit">ore</div></div>
+          <div class="cd-block"><div class="cd-num" id="cd-mins">--</div><div class="cd-unit">minuti</div></div>
+          <div class="cd-block"><div class="cd-num" id="cd-secs">--</div><div class="cd-unit">secondi</div></div>
+        </div>
+        <div class="cd-msg">
+          Per ora aspetta ancora un pochino —<br>
+          il <strong style="color:#c2385a;">22 aprile</strong> potrai aprire la sorpresa
+          che ho preparato solo per te. 🌸
+        </div>
+        <button class="unlock-btn" id="unlock-btn" onclick="openSurprise()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="7" rx="2" fill="white"/>
+            <path d="M5 7V5a3 3 0 016 0v2" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          </svg>
+          <span id="btn-label">sblocca il 22 aprile</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: MENU RICORDI -->
+<div id="screen-menu" class="screen">
+  <div class="app-wrap">
+    <div class="topbar">
+      <div id="back-wrap" style="display:none;">
+        <button class="back-btn" onclick="showMenuHome()">&#8592; torna al menù</button>
+      </div>
+      <p class="screen-title" id="page-title">i nostri ricordi</p>
+      <p class="screen-sub" id="page-sub">tutto quello che siamo</p>
+    </div>
+
+    <div id="sec-menu" class="section active">
+      <div class="menu-grid">
+        <div class="menu-card wide" onclick="showSection('galleria','La nostra galleria','tutti i nostri momenti')">
+          <div class="card-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="4" width="18" height="14" rx="3" stroke="#f48fb1" stroke-width="1.5"/><circle cx="8" cy="10" r="2" fill="#f48fb1"/><path d="M2 15l5-4 4 4 3-3 6 5" stroke="#f48fb1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <p class="card-title">La nostra galleria</p>
+          <p class="card-desc">Tutte le nostre foto insieme, in un posto solo.</p>
+        </div>
+        <div class="menu-card" onclick="showSection('complimenti','Un sorriso per te','solo per te')">
+          <div class="card-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2l2.5 5.5 6 .5-4.5 4 1.5 6L11 15l-5.5 3 1.5-6L2.5 8l6-.5L11 2z" fill="#f48fb1"/></svg>
+          </div>
+          <p class="card-title">Un sorriso per te</p>
+          <p class="card-desc">Premi e arriva qualcosa di bello.</p>
+        </div>
+        <div class="menu-card" onclick="showSection('promesse','Promesse per il futuro','quello che ti ho promesso')">
+          <div class="card-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11l5 5L18 6" stroke="#f48fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <p class="card-title">Le mie promesse</p>
+          <p class="card-desc">Cose che faremo insieme quest'anno.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="sec-galleria" class="section">
+      <div class="sec-body">
+        <div class="gallery-grid" id="gallery-grid">
+          <p class="gallery-empty" id="gallery-empty-msg">Le foto stanno arrivando...</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="sec-complimenti" class="section">
+      <div class="smile-section">
+        <div class="smile-icon-wrap">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="14" fill="#f48fb1"/><circle cx="13" cy="15" r="2" fill="white"/><circle cx="23" cy="15" r="2" fill="white"/><path d="M12 22c1.5 3 10.5 3 12 0" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="compliment-card">
+          <p class="compliment-text" id="compliment-text">Premi il cuore e arriva qualcosa di speciale solo per te.</p>
+        </div>
+        <button class="smile-btn" onclick="showCompliment()">💗</button>
+      </div>
+    </div>
+
+    <div id="sec-promesse" class="section">
+      <div class="sec-body">
+        <div class="promise-list" id="promise-list">
+          <p class="p-empty" id="p-empty-msg">Le promesse stanno arrivando...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: ADMIN -->
+<div id="screen-admin" class="screen">
+  <div class="admin-wrap">
+    <p class="admin-title">Pannello admin 🔧</p>
+
+    <div class="admin-section">
+      <h3>Carica foto nella galleria</h3>
+      <label class="admin-label" for="admin-photo-input">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="#c2718a" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="#c2718a" stroke-width="1.2"/></svg>
+        Scegli foto (anche multiple)
+      </label>
+      <input type="file" accept="image/*" multiple class="hidden-input" id="admin-photo-input" onchange="adminUploadPhotos(event)" />
+      <div class="upload-progress" id="upload-progress">Caricamento in corso...</div>
+      <div class="status-msg" id="photo-status">Foto caricate!</div>
+    </div>
+
+    <div class="admin-section">
+      <h3>Aggiungi una promessa</h3>
+      <input class="admin-input" id="admin-promise" placeholder="Es: Portarti a vedere il tramonto..." />
+      <button class="admin-btn" onclick="adminAddPromise()">Aggiungi</button>
+      <div class="status-msg" id="promise-status">Promessa aggiunta!</div>
+    </div>
+
+    <p class="admin-logout" onclick="showScreen('screen-countdown')">← torna all'app</p>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB3-Fm0yw1kJrffmBpx9dsPID53qZytdnU",
+  authDomain: "sorpresa-bd6bd.firebaseapp.com",
+  projectId: "sorpresa-bd6bd",
+  storageBucket: "sorpresa-bd6bd.firebasestorage.app",
+  messagingSenderId: "167566764992",
+  appId: "1:167566764992:web:e852472f9472745b617625"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const CLOUD_NAME = "dlec783fi";
+const UPLOAD_PRESET = "sorpresa_unsigned";
+
+window._db = db;
+window._collection = collection;
+window._addDoc = addDoc;
+window._onSnapshot = onSnapshot;
+window._doc = doc;
+window._updateDoc = updateDoc;
+window._CLOUD_NAME = CLOUD_NAME;
+window._UPLOAD_PRESET = UPLOAD_PRESET;
+
+// carica galleria in tempo reale
+const photosRef = collection(db, "photos");
+onSnapshot(photosRef, (snap) => {
+  const photos = [];
+  snap.forEach(d => photos.push({id: d.id, ...d.data()}));
+  photos.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+  window._photos = photos.map(p => p.url);
+  renderGallery(photos);
+});
+
+// carica promesse in tempo reale
+const promisesRef = collection(db, "promises");
+onSnapshot(promisesRef, (snap) => {
+  const promises = [];
+  snap.forEach(d => promises.push({id: d.id, ...d.data()}));
+  promises.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+  renderPromises(promises);
+});
+
+function renderGallery(photos) {
+  const grid = document.getElementById('gallery-grid');
+  const emptyMsg = document.getElementById('gallery-empty-msg');
+  if(photos.length === 0) {
+    grid.innerHTML = '<p class="gallery-empty" id="gallery-empty-msg">Le foto stanno arrivando...</p>';
+    return;
+  }
+  grid.innerHTML = '';
+  window._photos = photos.map(p => p.url);
+  photos.forEach((photo, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'gallery-cell';
+    cell.onclick = () => window.openLightbox(idx);
+    const img = document.createElement('img');
+    img.src = photo.url;
+    img.alt = '';
+    cell.appendChild(img);
+    grid.appendChild(cell);
+  });
+}
+
+function renderPromises(promises) {
+  const list = document.getElementById('promise-list');
+  if(promises.length === 0) {
+    list.innerHTML = '<p class="p-empty" id="p-empty-msg">Le promesse stanno arrivando...</p>';
+    return;
+  }
+  list.innerHTML = '';
+  promises.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'promise-item';
+    item.innerHTML = `
+      <div class="p-check ${p.done ? 'done' : ''}" onclick="togglePromise('${p.id}', ${p.done})"></div>
+      <p class="p-text ${p.done ? 'done' : ''}">${p.text}</p>
+    `;
+    list.appendChild(item);
+  });
+}
+
+window.adminUploadPhotos = async function(e) {
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+  const progress = document.getElementById('upload-progress');
+  const status = document.getElementById('photo-status');
+  progress.style.display = 'block';
+  for(let i=0; i<files.length; i++) {
+    progress.textContent = `Caricamento ${i+1}/${files.length}...`;
+    const formData = new FormData();
+    formData.append('file', files[i]);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if(data.secure_url) {
+        await window._addDoc(window._collection(window._db, "photos"), {
+          url: data.secure_url,
+          createdAt: Date.now()
+        });
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  }
+  progress.style.display = 'none';
+  status.style.display = 'block';
+  setTimeout(() => status.style.display = 'none', 2000);
+  e.target.value = '';
+};
+
+window.adminAddPromise = async function() {
+  const input = document.getElementById('admin-promise');
+  const val = input.value.trim();
+  if(!val) return;
+  await window._addDoc(window._collection(window._db, "promises"), {
+    text: val,
+    done: false,
+    createdAt: Date.now()
+  });
+  input.value = '';
+  const status = document.getElementById('promise-status');
+  status.style.display = 'block';
+  setTimeout(() => status.style.display = 'none', 2000);
+};
+
+window.togglePromise = async function(id, currentDone) {
+  const ref = window._doc(window._db, "promises", id);
+  await window._updateDoc(ref, { done: !currentDone });
+};
+</script>
+
+<script>
+// COUNTDOWN
+function pad(n){ return String(n).padStart(2,'0'); }
+function tick(){
+  const now = new Date();
+  const target = new Date('2026-04-22T00:00:00');
+  const diff = target - now;
+  if(diff <= 0){
+    document.getElementById('cd-days').textContent='00';
+    document.getElementById('cd-hours').textContent='00';
+    document.getElementById('cd-mins').textContent='00';
+    document.getElementById('cd-secs').textContent='00';
+    const btn = document.getElementById('unlock-btn');
+    btn.classList.add('active');
+    btn.disabled = false;
+    document.getElementById('btn-label').textContent = 'apri la sorpresa 💗';
+    return;
+  }
+  document.getElementById('cd-days').textContent=pad(Math.floor(diff/86400000));
+  document.getElementById('cd-hours').textContent=pad(Math.floor((diff%86400000)/3600000));
+  document.getElementById('cd-mins').textContent=pad(Math.floor((diff%3600000)/60000));
+  document.getElementById('cd-secs').textContent=pad(Math.floor((diff%60000)/1000));
+}
+tick();
+setInterval(tick,1000);
+
+function openSurprise(){
+  const btn = document.getElementById('unlock-btn');
+  if(btn.classList.contains('active')) showScreen('screen-menu');
+}
+
+// NAVIGATION
+window._photos = [];
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+window.showScreen = showScreen;
+
+function showSection(id, title, sub){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.getElementById('page-title').textContent = title;
+  document.getElementById('page-sub').textContent = sub;
+  document.getElementById('back-wrap').style.display = 'block';
+}
+
+function showMenuHome(){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-menu').classList.add('active');
+  document.getElementById('page-title').textContent = 'i nostri ricordi';
+  document.getElementById('page-sub').textContent = 'tutto quello che siamo';
+  document.getElementById('back-wrap').style.display = 'none';
+}
+
+// LIGHTBOX
+window.openLightbox = function(idx){
+  window._lbIdx = idx;
+  document.getElementById('lb-img').src = window._photos[idx];
+  document.getElementById('lb-counter').textContent = (idx+1)+' / '+window._photos.length;
+  document.getElementById('lightbox').classList.add('open');
+};
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
+function lbNext(){
+  if(!window._photos.length) return;
+  window._lbIdx = (window._lbIdx+1) % window._photos.length;
+  document.getElementById('lb-img').src = window._photos[window._lbIdx];
+  document.getElementById('lb-counter').textContent = (window._lbIdx+1)+' / '+window._photos.length;
+}
+function lbPrev(){
+  if(!window._photos.length) return;
+  window._lbIdx = (window._lbIdx-1+window._photos.length) % window._photos.length;
+  document.getElementById('lb-img').src = window._photos[window._lbIdx];
+  document.getElementById('lb-counter').textContent = (window._lbIdx+1)+' / '+window._photos.length;
+}
+
+// COMPLIMENTI
+const compliments = [
+  "Sei la mia vita. Non so come facevo prima di te.",
+  "Ti amo. Con tutto quello che ho.",
+  "Sei bellissima — ogni giorno, in ogni modo.",
+  "Quando sei vicina a me il mondo ha più senso.",
+  "Il tuo sorriso è la cosa più bella che i miei occhi abbiano mai visto.",
+  "Mi fai sentire a casa ovunque siamo.",
+  "Sei la persona più speciale che abbia mai incontrato.",
+  "Adoro come sei — anche nei momenti in cui non ti rendi conto di quanto sei straordinaria.",
+  "Ogni giorno con te è il mio giorno preferito.",
+  "Sei esattamente la persona di cui avevo bisogno, anche quando non lo sapevo ancora.",
+  "Non riesco a immaginare la mia vita senza di te.",
+  "Mi basta guardarti per stare bene.",
+  "Sei il posto dove voglio tornare sempre.",
+  "Hai un modo di ridere che mi fa impazzire — nel senso migliore.",
+  "Ti amerò anche domani. E anche dopodomani.",
+  "Sei tutto ciò che ho sempre cercato senza saperlo.",
+  "Con te anche le cose normali diventano speciali.",
+  "Sei la mia parte preferita di ogni giornata."
+];
+let lastIdx = -1;
+function showCompliment(){
+  let idx;
+  do { idx = Math.floor(Math.random()*compliments.length); } while(idx===lastIdx && compliments.length>1);
+  lastIdx = idx;
+  const el = document.getElementById('compliment-text');
+  el.style.transition='opacity 0.25s';
+  el.style.opacity='0';
+  setTimeout(()=>{
+    el.textContent=compliments[idx];
+    el.style.color='#7d2b4a';
+    el.style.fontStyle='italic';
+    el.style.opacity='1';
+  },250);
+}
+
+// ADMIN - accesso segreto: tocca 5 volte il titolo
+let tapCount = 0;
+let tapTimer;
+document.addEventListener('DOMContentLoaded', () => {
+  const title = document.getElementById('page-title');
+  if(title) {
+    title.addEventListener('click', () => {
+      tapCount++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(()=>tapCount=0, 2000);
+      if(tapCount >= 5){ tapCount=0; showScreen('screen-admin'); }
+    });
+  }
+});
+</script>
+</body>
+</html>
