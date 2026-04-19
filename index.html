@@ -407,7 +407,7 @@ window.togglePromise = async function(id, currentDone) {
 function pad(n){ return String(n).padStart(2,'0'); }
 function tick(){
   const now = new Date();
-  const target = new Date('2026-04-22T00:00:00');
+  const target = new Date('2025-04-22T00:00:00');
   const diff = target - now;
   if(diff <= 0){
     document.getElementById('cd-days').textContent='00';
